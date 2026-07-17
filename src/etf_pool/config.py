@@ -4,10 +4,10 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "default.json"
+CLASSIFICATION_CONFIG_PATH = PROJECT_ROOT / "configs" / "classification.json"
 
 
 def load_config(path: str | Path | None = None):
@@ -20,6 +20,18 @@ def load_config(path: str | Path | None = None):
         config = json.load(stream)
     if not isinstance(config, dict):
         raise ValueError(f"配置文件根节点必须是对象：{config_path}")
+    return config
+
+
+def load_classification_config(path: str | Path | None = None):
+    """读取ETF分类规则配置。"""
+    config_path = Path(path or CLASSIFICATION_CONFIG_PATH)
+    if not config_path.is_absolute():
+        config_path = PROJECT_ROOT / config_path
+    with config_path.open(encoding="utf-8") as stream:
+        config = json.load(stream)
+    if not isinstance(config, dict):
+        raise ValueError(f"分类配置文件根节点必须是对象：{config_path}")
     return config
 
 

@@ -3,10 +3,20 @@
 import argparse
 import importlib.util
 import json
+from collections.abc import Sequence
+from datetime import date
 from pathlib import Path
-from typing import Sequence
 
-from etf_pool.config import DEFAULT_CONFIG_PATH, PROJECT_ROOT, Settings, load_config
+from etf_pool.config import (
+    CLASSIFICATION_CONFIG_PATH,
+    DEFAULT_CONFIG_PATH,
+    PROJECT_ROOT,
+    Settings,
+    load_classification_config,
+    load_config,
+)
+from etf_pool.data.provider import TushareETFProvider
+from etf_pool.data.sync import classify_etf_snapshot, sync_and_classify_etfs
 
 
 def _doctor():
@@ -28,12 +38,54 @@ def _show_config(path: Path):
     return 0
 
 
+def _sync_classify(as_of_date: str, classification_config_path: Path):
+    settings = Settings.from_env()
+    provider = TushareETFProvider.from_settings(settings)
+    classification_config = load_classification_config(classification_config_path)
+    summary = sync_and_classify_etfs(
+        provider=provider,
+        data_dir=settings.data_dir,
+        source=settings.data_provider,
+        classification_config=classification_config,
+        as_of_date=as_of_date,
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _classify_snapshot(as_of_date: str, classification_config_path: Path):
+    settings = Settings.from_env()
+    classification_config = load_classification_config(classification_config_path)
+    summary = classify_etf_snapshot(
+        data_dir=settings.data_dir,
+        source=settings.data_provider,
+        classification_config=classification_config,
+        as_of_date=as_of_date,
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="etf-pool", description="动态ETF池工具")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("doctor", help="检查本地配置但不显示密钥")
     config_parser = subparsers.add_parser("show-config", help="显示当前生效的筛选配置")
     config_parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
+    sync_parser = subparsers.add_parser("sync-classify", help="同步全部上市ETF并生成分类实验")
+    sync_parser.add_argument("--as-of-date", default=date.today().isoformat())
+    sync_parser.add_argument(
+        "--classification-config",
+        type=Path,
+        default=CLASSIFICATION_CONFIG_PATH,
+    )
+    classify_parser = subparsers.add_parser("classify-snapshot", help="重新分类已有ETF快照")
+    classify_parser.add_argument("--as-of-date", required=True)
+    classify_parser.add_argument(
+        "--classification-config",
+        type=Path,
+        default=CLASSIFICATION_CONFIG_PATH,
+    )
     return parser
 
 
@@ -43,4 +95,8 @@ def main(argv: Sequence[str] | None = None):
         return _doctor()
     if args.command == "show-config":
         return _show_config(args.config)
+    if args.command == "sync-classify":
+        return _sync_classify(args.as_of_date, args.classification_config)
+    if args.command == "classify-snapshot":
+        return _classify_snapshot(args.as_of_date, args.classification_config)
     raise AssertionError(f"未处理的命令：{args.command}")

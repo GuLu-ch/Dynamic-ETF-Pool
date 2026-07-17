@@ -4,8 +4,6 @@ import importlib
 from dataclasses import dataclass
 from typing import Any
 
-import pandas as pd
-
 from etf_pool.config import Settings
 
 SUPPORTED_PROVIDERS = {"tushare", "tnskhdata"}
@@ -30,18 +28,11 @@ class TushareETFProvider:
         fields = ",".join(
             [
                 "ts_code",
-                "csname",
                 "extname",
-                "cname",
                 "index_code",
                 "index_name",
-                "setup_date",
-                "list_date",
-                "list_status",
                 "exchange",
                 "mgr_name",
-                "mgt_fee",
-                "etf_type",
             ]
         )
         return self.client.etf_basic(list_status=list_status, fields=fields)

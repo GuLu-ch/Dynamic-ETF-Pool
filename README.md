@@ -27,6 +27,7 @@ cp .env.example .env
 # 编辑 .env，填写 TUSHARE_TOKEN
 
 python -m etf_pool doctor
+python -m etf_pool sync-classify
 pytest
 ```
 
@@ -68,10 +69,14 @@ pytest
 ```bash
 python -m etf_pool doctor
 python -m etf_pool show-config
+python -m etf_pool sync-classify --as-of-date YYYY-MM-DD
+python -m etf_pool classify-snapshot --as-of-date YYYY-MM-DD
 pytest
 ruff check .
 mypy src
 ```
+
+`sync-classify` 使用 Tushare 兼容数据源的 `etf_basic(list_status="L")` 获取全部上市 ETF，固定请求 `ts_code,extname,index_code,index_name,exchange,mgr_name`。原始快照写入 `data/raw/`，逐只分类结果和统计按规则版本写入 `data/interim/classification/`；同一日期已有快照时命令会拒绝覆盖。更新分类规则后使用 `classify-snapshot` 从已有原始快照生成新版本，不会重复请求接口。
 
 `pytest` 随基础环境安装；Ruff 和 Mypy 属于可选开发工具，先运行 `make install-dev` 再使用。
 

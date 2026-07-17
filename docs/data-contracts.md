@@ -14,7 +14,7 @@
 
 - 建议路径：`raw/tushare/etf_basic/as_of_date=YYYY-MM-DD/part.csv`
 - 自然键：快照内 `ts_code`
-- 必需字段：`ts_code`, `list_date`, `list_status`, `exchange`, `index_code`, `mgr_name`, `etf_type`
+- 必需字段：`ts_code`, `extname`, `index_code`, `index_name`, `exchange`, `mgr_name`
 - 元数据：`source`, `fetched_at`, `as_of_date`, `schema_version`
 
 每次抓取保存独立快照，不用新的上市列表覆盖旧快照。
@@ -34,6 +34,17 @@
 - 必需字段：`listing_days`, `history_days`, `avg_amount_20d`
 - 可扩展字段：基金规模、管理费率、份额、数据缺失率和跟踪指数分类。
 - 指标字段名或元数据必须明确窗口、单位及缺失值处理。
+
+## ETF 分类实验表
+
+- 建议路径：`interim/classification/as_of_date=YYYY-MM-DD/version=VERSION/etf_classification.csv`
+- 自然键：`ts_code`
+- 输入：同一 `as_of_date` 的 ETF 基础表和分类配置
+- 必需字段：`ts_code`, `pool_category`, `archive_status`, `classification_rule`, `classification_reason`, `classification_confidence`, `needs_review`, `classification_version`, `classified_at`
+
+`pool_category` 只能为 `broad_market`、`sector`、`theme`、`overseas`、`fixed_income`、`commodity` 或空值。未进入六类轮动池的产品必须填写 `archive_status`，可选值为 `money_market`、`other`、`unknown`。不允许同时填写 `pool_category` 和 `archive_status`。
+
+同目录 `summary.json` 记录各类别数量、归档数量、待复核数量、输入快照、分类配置哈希、数据来源、抓取时间和代码版本。同一原始快照可以生成多个规则版本，已存在的版本禁止覆盖。名称关键词仅是分类证据之一，分类结果必须保留命中规则和理由。
 
 ## ETF 池快照
 
