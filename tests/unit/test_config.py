@@ -3,12 +3,12 @@ from pathlib import Path
 from etf_pool.config import Settings, load_config
 
 
-def test_default_config_has_screening_section() -> None:
+def test_default_config_has_screening_section():
     config = load_config()
     assert config["screening"]["min_history_days"] > 0
 
 
-def test_settings_reads_standard_env_keys(tmp_path: Path) -> None:
+def test_settings_reads_standard_env_keys(tmp_path: Path):
     env_file = tmp_path / ".env"
     env_file.write_text(
         "TUSHARE_TOKEN=test-token\n"

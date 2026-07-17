@@ -1,3 +1,3 @@
-"""Dynamic ETF pool research package."""
+"""动态ETF池研究包。"""
 
 __version__ = "0.1.0"

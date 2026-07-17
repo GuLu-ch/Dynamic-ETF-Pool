@@ -1,10 +1,10 @@
-# Secrets and local overrides
+# 密钥与本地覆盖配置
 .env
 .env.*
 !.env.example
 AGENTS.md
 
-# Python
+# Python缓存与构建产物
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -16,7 +16,7 @@ htmlcov/
 build/
 dist/
 
-# Environments and editors
+# 虚拟环境与编辑器配置
 .venv/
 venv/
 .idea/
@@ -24,7 +24,7 @@ venv/
 *.swp
 .DS_Store
 
-# Local data and generated ETF pool outputs
+# 本地数据与生成的ETF池结果
 data/raw/*
 data/interim/*
 data/processed/*

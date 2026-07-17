@@ -1,1 +1,1 @@
-"""Market-data providers and storage adapters."""
+"""行情数据源与存储适配器。"""

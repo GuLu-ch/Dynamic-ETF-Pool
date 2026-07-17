@@ -5,7 +5,7 @@ from etf_pool.screening.rules import ScreeningCriteria, apply_eligibility_rules
 
 
 @pytest.fixture
-def criteria() -> ScreeningCriteria:
+def criteria():
     return ScreeningCriteria(
         min_listing_days=120,
         min_history_days=120,
@@ -13,7 +13,7 @@ def criteria() -> ScreeningCriteria:
     )
 
 
-def test_rules_keep_auditable_rejection_reasons(criteria: ScreeningCriteria) -> None:
+def test_rules_keep_auditable_rejection_reasons(criteria: ScreeningCriteria):
     metrics = pd.DataFrame(
         {
             "ts_code": ["510300.SH", "159001.SZ"],
@@ -30,6 +30,6 @@ def test_rules_keep_auditable_rejection_reasons(criteria: ScreeningCriteria) -> 
     assert result.loc[1, "exclusion_reason"] == "listing_history,price_history,liquidity"
 
 
-def test_rules_reject_missing_columns(criteria: ScreeningCriteria) -> None:
+def test_rules_reject_missing_columns(criteria: ScreeningCriteria):
     with pytest.raises(ValueError, match="avg_amount_20d"):
         apply_eligibility_rules(pd.DataFrame({"listing_days": [], "history_days": []}), criteria)

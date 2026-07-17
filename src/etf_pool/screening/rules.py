@@ -1,6 +1,4 @@
-"""Transparent baseline eligibility rules."""
-
-from __future__ import annotations
+"""透明可审计的基础准入规则。"""
 
 from dataclasses import dataclass
 from typing import Any, Mapping
@@ -15,7 +13,7 @@ class ScreeningCriteria:
     min_avg_amount_20d: float
 
     @classmethod
-    def from_config(cls, config: Mapping[str, Any]) -> ScreeningCriteria:
+    def from_config(cls, config: Mapping[str, Any]):
         values = config["screening"]
         return cls(
             min_listing_days=int(values["min_listing_days"]),
@@ -24,14 +22,12 @@ class ScreeningCriteria:
         )
 
 
-def apply_eligibility_rules(
-    metrics: pd.DataFrame, criteria: ScreeningCriteria
-) -> pd.DataFrame:
-    """Annotate a metrics table with eligibility and auditable rejection reasons."""
+def apply_eligibility_rules(metrics: pd.DataFrame, criteria: ScreeningCriteria):
+    """为指标表添加准入结果与可审计的排除原因。"""
     required = {"listing_days", "history_days", "avg_amount_20d"}
     missing = sorted(required.difference(metrics.columns))
     if missing:
-        raise ValueError(f"Missing screening columns: {', '.join(missing)}")
+        raise ValueError(f"缺少筛选字段：{', '.join(missing)}")
 
     checks = {
         "listing_history": metrics["listing_days"].ge(criteria.min_listing_days),

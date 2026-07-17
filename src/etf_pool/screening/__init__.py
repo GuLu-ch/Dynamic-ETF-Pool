@@ -1,1 +1,1 @@
-"""Eligibility rules, ranking, and ETF pool construction."""
+"""ETF准入规则、排序与池构建。"""
