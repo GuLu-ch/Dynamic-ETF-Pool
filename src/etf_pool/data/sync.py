@@ -13,6 +13,7 @@ import pandas as pd
 from etf_pool.config import PROJECT_ROOT
 from etf_pool.data.storage import read_csv, write_csv, write_json
 from etf_pool.screening.classification import classify_etfs
+from etf_pool.screening.secondary import classify_secondary_etfs
 
 ETF_BASIC_FIELDS = [
     "ts_code",
@@ -231,6 +232,124 @@ def classify_etf_snapshot(
         normalized_date,
         str(metadata["fetched_at"]),
         paths["raw_csv"],
+    )
+    write_csv(classified, paths["classification_csv"])
+    write_json(summary, paths["summary"])
+    return summary
+
+
+def _secondary_paths(
+    data_dir: Path,
+    as_of_date: str,
+    primary_version: str,
+    secondary_version: str,
+):
+    primary_dir = (
+        data_dir
+        / "interim"
+        / "classification"
+        / f"as_of_date={as_of_date}"
+        / f"version={primary_version}"
+    )
+    output_dir = (
+        data_dir
+        / "interim"
+        / "secondary_classification"
+        / f"as_of_date={as_of_date}"
+        / f"primary_version={primary_version}"
+        / f"secondary_version={secondary_version}"
+    )
+    return {
+        "primary_csv": primary_dir / "etf_classification.csv",
+        "primary_summary": primary_dir / "summary.json",
+        "classification_csv": output_dir / "etf_classification.csv",
+        "summary": output_dir / "summary.json",
+    }
+
+
+def _secondary_summary(
+    classified: pd.DataFrame,
+    primary_summary: Mapping[str, Any],
+    secondary_config: Mapping[str, Any],
+    as_of_date: str,
+    input_snapshot: Path,
+):
+    counts = (
+        classified.groupby(
+            ["pool_category", "secondary_category", "secondary_category_name"],
+            dropna=False,
+        )
+        .size()
+        .reset_index(name="group_count")
+    )
+    groups = [
+        {
+            "pool_category": (
+                None if pd.isna(record["pool_category"]) else str(record["pool_category"])
+            ),
+            "secondary_category": str(record["secondary_category"]),
+            "secondary_category_name": str(record["secondary_category_name"]),
+            "count": int(record["group_count"]),
+        }
+        for record in counts.to_dict(orient="records")
+    ]
+    return {
+        "source": primary_summary.get("source", "unknown"),
+        "as_of_date": as_of_date,
+        "primary_classification_version": str(primary_summary["classification_version"]),
+        "primary_classification_config_hash": primary_summary["classification_config_hash"],
+        "secondary_classification_version": str(secondary_config["version"]),
+        "secondary_classification_config_hash": _config_hash(secondary_config),
+        "code_version": _code_version(),
+        "input_snapshot": str(input_snapshot),
+        "total_count": int(len(classified)),
+        "rotation_count": int(classified["pool_category"].notna().sum()),
+        "archived_count": int(classified["archive_status"].notna().sum()),
+        "fallback_count": int(
+            classified["secondary_classification_rule"].eq("secondary_fallback").sum()
+        ),
+        "needs_secondary_review_count": int(classified["needs_secondary_review"].sum()),
+        "group_counts": groups,
+    }
+
+
+def classify_secondary_snapshot(
+    data_dir: Path,
+    primary_version: str,
+    secondary_config: Mapping[str, Any],
+    as_of_date: str,
+    classified_at: str | None = None,
+):
+    """从版本化一级分类快照生成二级相关暴露分组。"""
+    normalized_date = _validate_as_of_date(as_of_date)
+    paths = _secondary_paths(
+        data_dir,
+        normalized_date,
+        primary_version,
+        str(secondary_config["version"]),
+    )
+    if not paths["primary_csv"].exists() or not paths["primary_summary"].exists():
+        raise FileNotFoundError(f"找不到一级分类快照：{paths['primary_csv']}")
+    _ensure_new_snapshot(
+        {
+            "classification_csv": paths["classification_csv"],
+            "summary": paths["summary"],
+        }
+    )
+
+    primary = read_csv(paths["primary_csv"])
+    versions = {str(value) for value in primary["classification_version"].dropna().unique()}
+    if versions != {primary_version}:
+        raise ValueError(f"一级分类版本不匹配：期望{primary_version}，实际{sorted(versions)}")
+    timestamp = classified_at or datetime.now(timezone.utc).isoformat()
+    classified = classify_secondary_etfs(primary, secondary_config, classified_at=timestamp)
+    primary_summary = json.loads(paths["primary_summary"].read_text(encoding="utf-8"))
+    summary = _secondary_summary(
+        classified,
+        primary_summary,
+        secondary_config,
+        normalized_date,
+        paths["primary_csv"],
     )
     write_csv(classified, paths["classification_csv"])
     write_json(summary, paths["summary"])

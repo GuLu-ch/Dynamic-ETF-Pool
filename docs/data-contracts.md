@@ -46,6 +46,17 @@
 
 同目录 `summary.json` 记录各类别数量、归档数量、待复核数量、输入快照、分类配置哈希、数据来源、抓取时间和代码版本。同一原始快照可以生成多个规则版本，已存在的版本禁止覆盖。名称关键词仅是分类证据之一，分类结果必须保留命中规则和理由。
 
+## ETF 二级分类实验表
+
+- 建议路径：`interim/secondary_classification/as_of_date=YYYY-MM-DD/primary_version=VERSION/secondary_version=VERSION/etf_classification.csv`
+- 自然键：`ts_code`
+- 输入：一级分类实验表和二级分类配置
+- 必需字段：`ts_code`, `pool_category`, `secondary_category`, `secondary_category_name`, `secondary_classification_rule`, `secondary_classification_reason`, `secondary_classification_confidence`, `needs_secondary_review`, `secondary_classification_version`, `secondary_classified_at`
+
+每只进入六类轮动池的 ETF 必须填写一个二级分类。非轮动归档产品使用与 `archive_status` 对应的归档二级分类。二级规则只能在对应 `pool_category` 内匹配；回退到“其他”组、同指数传播或分类冲突时，`needs_secondary_review` 必须为真。
+
+同目录 `summary.json` 记录一级与二级交叉数量、回退数量、待复核数量、一级和二级配置哈希、输入分类快照及代码版本。已存在的一级、二级版本组合禁止覆盖。
+
 ## ETF 池快照
 
 - 建议路径：`processed/pools/as_of_date=YYYY-MM-DD/pool.csv`

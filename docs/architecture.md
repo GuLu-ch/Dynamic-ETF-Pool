@@ -28,6 +28,7 @@ Tushare API
 
 - `configs/default.json`：进入 Git 的 ETF 范围和筛选参数。
 - `configs/classification.json`：进入 Git 的分类词表、规则顺序和分类版本。
+- `configs/secondary-classification.json`：进入 Git 的二级相关暴露分组及其版本。
 - `.env`：Token、数据源和本机路径，只存在本地。
 - 命令行参数：单次运行的数据截止日、输入和输出路径。
 

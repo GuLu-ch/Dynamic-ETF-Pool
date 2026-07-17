@@ -114,6 +114,28 @@ def test_ai_industrial_internet_and_smart_ev_are_themes(classification_config):
     assert result["pool_category"].tolist() == ["theme", "theme", "theme"]
 
 
+def test_primary_consistency_corrections(classification_config):
+    frame = _etfs(
+        [
+            ("159176.SZ", "中证全指家用电器ETF", "930697.CSI", "中证家用电器"),
+            ("159546.SZ", "中证全指集成电路ETF", "932087.CSI", "中证集成电路"),
+            ("513400.SH", "道琼斯工业平均ETF", "DJIA.UN", "道琼斯工业平均"),
+            ("513310.SH", "中韩半导体ETF", "931790.CSI", "中证中韩半导体"),
+            ("159188.SZ", "标普中国A股红利100ETF", "SPCADMCP.OTH", "标普中国A股红利100"),
+        ]
+    )
+
+    result = classify_etfs(frame, classification_config)
+
+    assert result["pool_category"].tolist() == [
+        "sector",
+        "sector",
+        "overseas",
+        "overseas",
+        "broad_market",
+    ]
+
+
 def test_same_index_propagates_unique_category(classification_config):
     frame = _etfs(
         [

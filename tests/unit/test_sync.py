@@ -6,8 +6,13 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from etf_pool.config import load_classification_config
-from etf_pool.data.sync import ETF_BASIC_FIELDS, classify_etf_snapshot, sync_and_classify_etfs
+from etf_pool.config import load_classification_config, load_secondary_classification_config
+from etf_pool.data.sync import (
+    ETF_BASIC_FIELDS,
+    classify_etf_snapshot,
+    classify_secondary_snapshot,
+    sync_and_classify_etfs,
+)
 
 
 class FakeProvider:
@@ -88,6 +93,25 @@ def test_sync_writes_immutable_snapshot_and_classification(tmp_path: Path):
     next_output = output_dir.parent / "version=test-next" / "etf_classification.csv"
     assert next_output.exists()
     assert next_summary["classification_version"] == "test-next"
+
+    secondary_summary = classify_secondary_snapshot(
+        data_dir=tmp_path,
+        primary_version=classification_version,
+        secondary_config=load_secondary_classification_config(),
+        as_of_date=as_of_date,
+        classified_at="2026-07-17T02:00:00+00:00",
+    )
+    secondary_output = (
+        tmp_path
+        / "interim"
+        / "secondary_classification"
+        / f"as_of_date={as_of_date}"
+        / f"primary_version={classification_version}"
+        / f"secondary_version={load_secondary_classification_config()['version']}"
+        / "etf_classification.csv"
+    )
+    assert secondary_output.exists()
+    assert secondary_summary["fallback_count"] == 0
 
 
 def test_sync_rejects_duplicate_natural_keys(tmp_path: Path):
