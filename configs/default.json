@@ -1,0 +1,12 @@
+{
+  "universe": {
+    "exchanges": ["SH", "SZ"],
+    "list_status": "L",
+    "include_qdii": true
+  },
+  "screening": {
+    "min_listing_days": 120,
+    "min_history_days": 120,
+    "min_avg_amount_20d": 20000000.0
+  }
+}
