@@ -1,18 +1,20 @@
-# Format: type(scope): concise summary
+# 格式：type(scope): 清晰的中文描述
 #
-# Allowed types:
-#   feat      new ETF pool capability
-#   fix       bug fix
-#   data      data source, schema, or quality change
-#   docs      documentation only
-#   test      tests only
-#   refactor  internal code change without behavior change
-#   perf      performance improvement
-#   build     dependency or packaging change
-#   ci        CI/CD change
-#   chore     repository maintenance
-#   revert    revert an earlier commit
+# 允许的类型：
+#   feat      新增ETF池能力
+#   fix       修复缺陷
+#   data      数据源、结构或质量规则变更
+#   docs      仅修改文档
+#   test      仅修改测试
+#   refactor  不改变行为的内部重构
+#   perf      性能改进
+#   build     依赖或打包变更
+#   ci        持续集成变更
+#   chore     仓库维护
+#   revert    撤销已有提交
 #
-# Common scopes: data, tushare, screening, config, cli, docs, git
-# Scope is optional. Keep the first line at 72 characters or fewer.
-# Use the body to explain why when the subject is not sufficient.
+# 常用scope：data、tushare、screening、config、cli、docs、git
+# scope可选；中文描述至少6个字符。
+# 首行不超过72个字符，末尾不加句号。
+# 标题不足以解释变更时，在正文中说明原因和影响。
+# 不兼容变更必须使用BREAKING CHANGE:页脚说明迁移方式。

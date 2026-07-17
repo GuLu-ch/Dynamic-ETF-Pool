@@ -10,18 +10,48 @@ if [[ "$subject" == Merge\ * || "$subject" == Revert\ \"* ]]; then
 fi
 
 if (( ${#subject} > 72 )); then
-    echo "Commit subject must be 72 characters or fewer." >&2
+    echo "提交标题不能超过72个字符。" >&2
     exit 1
 fi
 
 if [[ ! "$subject" =~ $pattern ]]; then
     cat >&2 <<'EOF'
-Invalid commit message.
+提交说明格式不正确。
 
-Required format: type(scope): concise summary
-Example: feat(screening): add liquidity filter
+要求格式：type(scope): 清晰的中文描述
+示例：feat(screening): 增加流动性筛选规则
 
-Allowed types: feat, fix, data, docs, test, refactor, perf, build, ci, chore, revert
+允许的type：feat、fix、data、docs、test、refactor、perf、build、ci、chore、revert
 EOF
+    exit 1
+fi
+
+description=${subject#*: }
+description_lower=${description,,}
+
+if (( ${#description} < 6 )); then
+    echo "提交描述至少需要6个字符。" >&2
+    exit 1
+fi
+
+if [[ "$description" == *. ]]; then
+    echo "提交标题末尾不能使用句号。" >&2
+    exit 1
+fi
+
+if ! printf '%s\n' "$description" | grep -Pq '\p{Han}'; then
+    echo "提交描述必须使用中文。" >&2
+    exit 1
+fi
+
+case "$description_lower" in
+    "更新文件" | "修复问题" | "其他修改" | "临时修改" | "调整代码" | "修改内容")
+        echo "提交描述过于模糊，必须明确实际动作和对象。" >&2
+        exit 1
+        ;;
+esac
+
+if [[ "$subject" =~ ^[^:]+!: ]] && ! grep -Eq '^BREAKING CHANGE: .+' "$message_file"; then
+    echo "不兼容变更必须包含'BREAKING CHANGE:'页脚。" >&2
     exit 1
 fi
