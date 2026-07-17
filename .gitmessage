@@ -1,0 +1,18 @@
+# Format: type(scope): concise summary
+#
+# Allowed types:
+#   feat      new ETF pool capability
+#   fix       bug fix
+#   data      data source, schema, or quality change
+#   docs      documentation only
+#   test      tests only
+#   refactor  internal code change without behavior change
+#   perf      performance improvement
+#   build     dependency or packaging change
+#   ci        CI/CD change
+#   chore     repository maintenance
+#   revert    revert an earlier commit
+#
+# Common scopes: data, tushare, screening, config, cli, docs, git
+# Scope is optional. Keep the first line at 72 characters or fewer.
+# Use the body to explain why when the subject is not sufficient.

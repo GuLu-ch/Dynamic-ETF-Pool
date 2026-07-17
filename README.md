@@ -83,4 +83,6 @@ mypy src
 
 远程仓库：<https://github.com/GuLu-ch/Dynamic-ETF-Pool.git>
 
+首次克隆后运行 `make git-setup`，启用统一的提交模板与格式检查。提交采用 `type(scope): subject` 格式，完整规则见 [Git 提交规范](docs/git-conventions.md)。
+
 本地数据、生成结果和 `.env` 均被忽略。提交前至少运行 `pytest`，并用 `git status --ignored` 确认密钥与数据没有进入待提交文件。

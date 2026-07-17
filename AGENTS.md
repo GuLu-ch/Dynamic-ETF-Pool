@@ -52,5 +52,7 @@
 
 - 提交前使用 `git status --ignored` 检查 `.env` 和本地数据状态。
 - 分支建议使用 `feature/`、`fix/`、`data/` 前缀。
-- 提交建议使用 `feat:`、`fix:`、`docs:`、`test:`、`refactor:`、`chore:` 前缀。
+- 提交必须遵循 `type(scope): subject` 格式，具体类型和示例见 `docs/git-conventions.md`。
+- 首行最多 72 个字符；scope 使用小写英文且仅描述主要影响模块。
+- 克隆仓库后运行 `make git-setup`，启用提交模板和格式校验钩子。
 - 不重写共享分支历史，不用破坏性命令处理不属于自己的改动。

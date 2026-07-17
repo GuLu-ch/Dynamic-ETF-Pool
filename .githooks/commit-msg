@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+message_file=$1
+subject=$(head -n 1 "$message_file")
+pattern='^(feat|fix|data|docs|test|refactor|perf|build|ci|chore|revert)(\([a-z0-9][a-z0-9._-]*\))?!?: .+'
+
+if [[ "$subject" == Merge\ * || "$subject" == Revert\ \"* ]]; then
+    exit 0
+fi
+
+if (( ${#subject} > 72 )); then
+    echo "Commit subject must be 72 characters or fewer." >&2
+    exit 1
+fi
+
+if [[ ! "$subject" =~ $pattern ]]; then
+    cat >&2 <<'EOF'
+Invalid commit message.
+
+Required format: type(scope): concise summary
+Example: feat(screening): add liquidity filter
+
+Allowed types: feat, fix, data, docs, test, refactor, perf, build, ci, chore, revert
+EOF
+    exit 1
+fi
